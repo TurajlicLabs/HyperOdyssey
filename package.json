@@ -1,0 +1,43 @@
+{
+  "name": "knightrider",
+  "version": "0.0.1",
+  "description": "A javascript library for simplifying Hypertext Application Language (HAL)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TurajlicLabs/KnightRider.git"
+  },
+  "keywords": [
+    "hal",
+    "typescript",
+    "hypermedia"
+  ],
+  "author": "TurajlicLabs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TurajlicLabs/KnightRider/issues"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    }
+  },
+  "homepage": "https://github.com/TurajlicLabs/KnightRider#readme",
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/jest": "^25.2.1",
+    "babel-jest": "^25.2.6",
+    "jest": "^25.2.7",
+    "ts-jest": "^25.3.1",
+    "typescript": "^3.8.3"
+  }
+}
