@@ -1,0 +1,7 @@
+# General
+.idea/
+node_modules/
+
+# Ignores compiled TypeScript files
+src/**/*.js
+tests/**/*.js
