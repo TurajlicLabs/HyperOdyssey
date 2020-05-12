@@ -35,5 +35,11 @@ describe( '@/HyperOdyssey', () => {
         expect( hyperOdysseyOnlyApiRepresentation.baseRepresentation ).toEqual( Representation );
         expect( hyperOdysseyOnlyApiRepresentation.apiRepresentation ).toEqual( testApiRepresentation );
 
+        const hyperOdysseyOnlyBaseRepresentation = new HyperOdyssey( MockHttpClient, {
+            baseRepresentation : testBaseRepresentation
+        } );
+
+        expect( hyperOdysseyOnlyBaseRepresentation.baseRepresentation ).toEqual( testBaseRepresentation );
+        expect( hyperOdysseyOnlyBaseRepresentation.apiRepresentation ).toEqual( testBaseRepresentation );
     } );
 } );
