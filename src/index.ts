@@ -1,4 +1,4 @@
-import HyperOdyssey from "./HyperOdyssey";
+import HyperOdyssey from './HyperOdyssey';
 
-export { default as Representation } from "./Representation";
+export { default as Representation } from './Representation';
 export default HyperOdyssey;

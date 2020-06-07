@@ -2,7 +2,6 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "strict": true,
         "baseUrl": ".",
         "types": [
             "jest"
@@ -22,6 +21,12 @@
         "exclude": [
             "node_modules",
             "examples"
+        ],
+        "lib": [
+            "dom",
+            "es5",
+            "scripthost",
+            "es2015"
         ]
     }
 }
