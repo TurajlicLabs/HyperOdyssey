@@ -7,11 +7,8 @@ import Axios from "axios";
 
 Vue.config.productionTip = false;
 
-const axios = Axios.create( {
-
-} );
-
-const hyperOdyssey = new HyperOdyssey( axios );
+const axios = Axios.create( {} );
+Vue.prototype.$hyperOdyssey = new HyperOdyssey( axios );
 
 new Vue( {
     router,
