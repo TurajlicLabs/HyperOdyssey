@@ -42,12 +42,17 @@
     "homepage": "https://github.com/TurajlicLabs/HyperOdyssey#readme",
     "devDependencies": {
         "@babel/core": "7.9.0",
+        "@babel/plugin-transform-runtime": "7.10.1",
         "@babel/preset-env": "7.9.5",
         "@babel/preset-typescript": "7.9.0",
         "@types/jest": "25.2.1",
         "babel-jest": "25.3.0",
         "jest": "25.3.0",
-        "ts-jest": "^26.0.0",
+        "ts-jest": "26.0.0",
         "typescript": "3.8.3"
+    },
+    "dependencies": {
+        "halfred": "2.0.0",
+        "uri-templates": "^0.2.0"
     }
 }

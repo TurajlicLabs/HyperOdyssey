@@ -5,17 +5,15 @@ import {
     HttpResponse,
     HttpMethodOptions
 } from '@/interface';
-
 import Representation from '@/Representation';
 import { HttpMethod } from '@/constant';
+import DefaultCachingMechanism from "@/CachingMechanism";
 
-// This is just here so we have a base caching class to refer to
-class DefaultCaching<K, V> extends Map implements CachingInterface {
-}
+import { parse } from 'halfred';
 
-const DEFAULT_CACHING = new DefaultCaching<String, HttpResponse>();
+const DEFAULT_CACHING = new DefaultCachingMechanism<string, HttpResponse>();
 
-function isHttpClient( httpClient: HttpClient | undefined ) {
+function isHttpClient( httpClient: HttpClient | InitParams | undefined ) {
     if ( !httpClient ) {
         return false;
     }
@@ -26,8 +24,8 @@ function isHttpClient( httpClient: HttpClient | undefined ) {
 export default class HyperOdyssey {
     private readonly httpClient: HttpClient;
     private readonly _httpCache: CachingInterface | undefined;
-    baseRepresentation: Representation;
-    apiRepresentation: Representation;
+    private _baseRepresentation: typeof Representation;
+    private _apiRepresentation: typeof Representation;
 
     constructor( initParams: InitParams | HttpClient ) {
         if ( initParams && 'httpClient' in initParams ) {
@@ -38,24 +36,32 @@ export default class HyperOdyssey {
                 throw new TypeError( 'Invalid http client specified' );
             }
 
-            this.baseRepresentation = initParams?.baseRepresentation ?? Representation;
-            this.apiRepresentation = initParams?.apiRepresentation ?? this.baseRepresentation;
+            this._baseRepresentation = initParams.baseRepresentation ?? Representation;
+            this._apiRepresentation = initParams.apiRepresentation ?? this._baseRepresentation;
 
-            if ( !!initParams?.httpCaching ) {
-                this._httpCache = initParams?.httpCachingMechanism ?? DEFAULT_CACHING;
+            let httpCaching = initParams.httpCaching;
+            if ( httpCaching ) {
+                if (  typeof httpCaching !== "boolean" ) {
+                    this._httpCache = httpCaching.httpCachingMechanism ?? DEFAULT_CACHING;
+                    this._httpCache.httpCachingMethods = httpCaching.httpCachingMethods ?? [ HttpMethod.GET ];
+                }
+                else {
+                    this._httpCache = DEFAULT_CACHING;
+                    this._httpCache.httpCachingMethods = [ HttpMethod.GET ];
+                }
             }
         }
         else if ( isHttpClient( initParams ) ) {
             this.httpClient = <HttpClient>initParams;
-            this.baseRepresentation = Representation;
-            this.apiRepresentation = this.baseRepresentation;
+            this._baseRepresentation = Representation;
+            this._apiRepresentation = this._baseRepresentation;
         }
         else {
             throw new Error( 'No valid arguments specified' );
         }
     }
 
-    protected http( { url = '', method = HttpMethod.GET, httpMethodOptions = {}, force = false } ): Promise<HttpResponse> {
+    http( { url = '', method = HttpMethod.GET, httpMethodOptions = {}, force = false } ): Promise<HttpResponse> {
         if ( method in this.httpClient ) {
             let response: Promise<HttpResponse>;
             let httpMethod: ( httpMethodOptions: HttpMethodOptions ) => Promise<HttpResponse>;
@@ -66,8 +72,8 @@ export default class HyperOdyssey {
                 httpMethodOptions[ 'url' ] = url;
             }
 
-            if ( this._httpCache ) {
-                let uId = url + JSON.stringify( httpMethodOptions );
+            if ( this._httpCache && this._httpCache.httpCachingMethods.includes( method ) ) {
+                let uId = method.toUpperCase() + url + JSON.stringify( httpMethodOptions );
                 if ( !this._httpCache.has( uId ) || force ) {
                     response = httpMethod( httpMethodOptions );
                     this._httpCache.set( uId, response );
@@ -87,7 +93,11 @@ export default class HyperOdyssey {
         throw new TypeError( `There is no method named ${ method } present in your httpClient` );
     }
 
-    fetchRoot( ...args: any[] ): Promise<HttpResponse> {
+    parse( halObject ) {
+        return parse( halObject );
+    }
+
+    async fetchRoot( ...args: any[] ): Promise<Representation> {
         let last = args.pop();
         let params: Array<string|boolean|object> = [];
         let force = true;
@@ -102,10 +112,20 @@ export default class HyperOdyssey {
         let [ url, method, httpMethodOptions ] = params;
         // @ts-ignore
         // @TODO: figure out how to remove the ignore
-        return this.http( { url, method, httpMethodOptions, force } );
+        const resource = this.parse( await this.http( { url, method, httpMethodOptions, force } ) );
+        // @ts-ignore
+        return new this._apiRepresentation( url, resource, this )
     }
 
     get httpCache(): CachingInterface | undefined {
         return this._httpCache;
+    }
+
+    get baseRepresentation(): typeof Representation {
+        return this._baseRepresentation;
+    }
+
+    get apiRepresentation(): typeof Representation {
+        return this._apiRepresentation;
     }
 }

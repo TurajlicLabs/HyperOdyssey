@@ -1,7 +1,6 @@
 import HyperOdyssey from '@/HyperOdyssey';
 import Representation from '@/Representation';
 import MockHttpClient from './utils/MockHttpClient';
-import { HttpResponse } from '@/interface';
 import { HttpMethod } from '@/constant';
 
 describe( '@/HyperOdyssey', () => {
@@ -68,12 +67,42 @@ describe( '@/HyperOdyssey', () => {
         expect( hyperOdyssey.httpCache ).toBeDefined();
     } );
 
-    it( 'Create instance with API caching and custom caching httpCachingMechanism ', function() {
-        const customCaching = new Map<String, Promise<HttpResponse>>();
+    it( 'Create instance with API caching and custom caching httpCachingMechanism', function() {
+        const customCaching = {
+            httpCachingMethods: [],
+            clear: jest.fn(),
+            delete: jest.fn(),
+            get: jest.fn(),
+            has: jest.fn(),
+            set: jest.fn()
+        };
         const hyperOdyssey = new HyperOdyssey( {
             httpClient,
-            httpCaching: true,
-            httpCachingMechanism: customCaching
+            httpCaching: {
+                httpCachingMechanism: customCaching
+            },
+        } );
+
+        expect( customCaching.httpCachingMethods ).toEqual( [ HttpMethod.GET ] );
+        expect( hyperOdyssey.httpCache ).toBeDefined();
+        expect( hyperOdyssey.httpCache ).toEqual( customCaching );
+    } );
+
+    it( 'Create instance with API caching and custom caching httpCachingMechanism and httpCachingMethods', function() {
+        const customCaching = {
+            httpCachingMethods: [],
+            clear: jest.fn(),
+            delete: jest.fn(),
+            get: jest.fn(),
+            has: jest.fn(),
+            set: jest.fn()
+        };
+        const hyperOdyssey = new HyperOdyssey( {
+            httpClient,
+            httpCaching: {
+                httpCachingMechanism: customCaching,
+                httpCachingMethods: [ HttpMethod.GET, HttpMethod.HEAD ]
+            },
         } );
 
         expect( hyperOdyssey.httpCache ).toBeDefined();
@@ -114,7 +143,7 @@ describe( '@/HyperOdyssey', () => {
             httpClient.head.mockClear();
 
             hyperOdyssey.fetchRoot( mockApiUrl, HttpMethod.HEAD, false );
-            expect( httpClient.head ).not.toHaveBeenCalledWith( { url: mockApiUrl } );
+            expect( httpClient.head ).toHaveBeenCalledWith( { url: mockApiUrl } );
         } );
 
         it( 'Fetch root with api url, method and parameters', function() {
@@ -124,7 +153,7 @@ describe( '@/HyperOdyssey', () => {
             httpClient.post.mockClear();
 
             hyperOdyssey.fetchRoot( mockApiUrl, HttpMethod.POST, mockParameters, false );
-            expect( httpClient.post ).not.toHaveBeenCalledWith( { url: mockApiUrl, ...mockParameters } );
+            expect( httpClient.post ).toHaveBeenCalledWith( { url: mockApiUrl, ...mockParameters } );
         } );
     } );
 } );
